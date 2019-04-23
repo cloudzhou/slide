@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="iot espressif" />
+    <meta name="description" content="iot cloud at espressif" />
+    <link rel="icon" href="https://espressif.com/sites/all/themes/espressif/favicon.ico" type="image/x-icon">
+    <title>Smart Light @ Bfc</title>
+    <style>
+//      @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+//      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+//      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p { line-height: 1.25em; font-size: 1.4em; }
+      .small {font-size: 0.5em;}
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .img-30 img {
+        width: 30%;
+        height: 30%;
+        margin-right: 10px;
+      }
+      .img-80 img {
+        width: 80%;
+        height: 80%;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# Smart Light @ Bfc
+[复星停车场智能照明项目]
+---
+layout: false
+## 传统停车场照明存在的问题：
+
+1. 无法按照需求 / 场景调整照明策略
+
+2. 没有主动的故障报警机制
+
+3. 缺乏智能化集成
+
+4. 高电量消耗
+
+5. 寿命短，维护成本高
+
+---
+## 外滩金融中心智能照明解决方案：
+
+1. 根据 雷达触发 / 特定时间段 定制不同的照明规则
+
+2. 显示实时状态，故障紧急报警
+
+3. 实现智能分析，生成数据报表
+
+4. 基于 LED 照明，节能 60% 以上
+
+5. 5 万个小时的超长寿命
+
+---
+## 这套解决方案将提供：
+
+1. 基于 Mesh 的 WiFi 互联，极大减少网络部署成本
+
+2. 雷达感知，灯自动点亮以及推送到服务端
+
+3. 区域 / 路线 维护以及控制
+
+4. 雷达触发实现 区域 / 路线 的智能照明
+
+5. 多种节能等级，适应于不同的 时间段 / 季节 / 日期
+
+6. 便捷，人性化的管理后台
+
+---
+## 从传统停车场进行改造：
+
+1. 无线 AP 的部署（因为 Mesh 的应用，极大减少 AP 数量）
+
+2. 智能 LED 灯管的安装和初始化
+
+3. 定义 区域 / 路线，配置照明规则
+
+---
+## Demo 的准备工作
+
+1. 乐鑫将提供
+  - 路由器
+  - 10+ LED 灯管
+  - 笔记本（充当便捷式服务器）
+
+2. 复星集团提供电源支持
+
+3. 根据拓扑结构，实现智能照明解决方案
+
+4. 测试方案
+  - 区域 / 路线 控制
+  - 雷达触发 区域 / 路线 的智能照明
+  - 实现不同的节能等级
+  - 定时修改节能状态
+---
+## Demo 具体测试事项（10 个 LED 灯具）
+
+1. 单灯近距离触发照亮
+
+2. 把灯具分成 4 组，做到按照分片进行控制
+
+3. 模拟一条道路的触发，可以调整敏感度
+
+  （触发范围和指定时间内）
+
+4. 切换不同的节能等级，可以看出亮度的不同
+
+  （20%, 50%, 80%, 100%）
+
+5. 设置定时，当定时到了之后，可以看出节能模式切换
+---
+## 具体的项目实施
+
+1. AP 实施，测试信号环境
+
+2. 分部实施，替换原有的照明
+
+3. 集体调试，按照真实环境模拟
+
+---
+template: inverse
+![](http://espressif.com/sites/default/files/banner2-img1.png)
+# 让照明更加的智能
+
+    </textarea>
+    <script src="/static/js/remark-latest.min.js"></script>
+    <script>
+      var hljs = remark.highlighter.engine;
+    </script>
+    <script src="/static/js/remark.language.js"></script>
+    <script>
+      var slideshow = remark.create({
+          highlightStyle: 'monokai',
+          highlightLanguage: 'remark',
+          highlightLines: true
+        }) ;
+    </script>
+  </body>
+</html>

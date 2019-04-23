@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="dsl code generator" />
+    <meta name="description" content="" />
+    <link rel="icon" href="https://www.pingxx.com/assets/img/touch_icon.png" type="image/png">
+    <title>DSL Code Generator !</title>
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 4em;
+	right: 5em;
+      }
+      li p { line-height: 1.25em; }
+      .small {font-size: 0.5em;}
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .img-30 img {
+        width: 30%;
+        height: 30%;
+        margin-right: 10px;
+      }
+      .img-80 img {
+        width: 80%;
+        height: 80%;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# DSL Code Generator
+[ORM, API 代码生成]
+
+.footnote[yunzhou.wu@pingxx.com]
+---
+layout: false
+## 问题：
+
+- sql 侵入业务开发，基于数据库而不是基于模型
+
+- 事务开发需要非常小心
+
+- gorm.ErrRecordNotFound ？ 错误的往上传递 vs panic ？
+
+- 数据库层代码的复用
+
+- api 统一的输入和输出
+
+- http vs rpc
+
+- client，docs 开发和维护
+
+- Logging
+
+- Tracing
+
+- context.Context
+
+---
+## ORM  
+
+- 模型和数据库表结构的一一对应
+
+- 面向对象，方法和数据库语句的映射
+
+- 一个方法对应一条 sql 语句，提供基础的参数类型 // 复杂类型带来的问题？
+
+- 事务封装在方法里，大部分开发人员并不需要关心事务
+
+- 自动解决批量 插入／更新／删除 的问题
+
+- java8 streams 接口实现
+
+- 没有注入的风险
+
+- Golang 的枚举和日期处理
+
+---
+## 定义消息
+
+```go
+message Recharge {
+    option (table) = "balance_recharge";
+    option (valid) = "valid";
+
+    enum status {
+	    pending = 0;
+	    succeeded = 1; 
+	    failed = 2;
+    }
+
+    int32       Id = 1;
+    Timestamp   Created = 2;
+    Timestamp   Updated = 3;
+    bool        Visibly = 4;
+
+    string	RechargeId	= 5	[(maxLength)=64];
+    string	AcctId	   	= 6	[(maxLength)=20];
+    string	AppId	   	= 7 	[(maxLength)=20];
+    Timestamp	Successded 	= 8;
+    bool	Refunded	= 9;
+    int32	UserFee		= 13;
+    string	User		= 14	[(maxLength)=64];
+    ...
+   
+```
+---
+## 定义接口
+
+```go
+// Doer 数据库模型需要实现的接口
+type Doer interface {
+
+	Save() error
+
+	Update(cs ...Col) error
+
+	Incr(colValues ...ColValue) error
+
+	Invisibly() error
+
+	Delete() error
+
+	Valid() error
+
+}
+```
+
+---
+## 定义方法
+
+### 查询
+```go
+   rpc FindRechargeByRechargeId(Bytes) returns (Recharge) {
+        option (args) = "rechargeId string";
+        option (sql) = "select * from balance_recharge where recharge_id = ?";
+    }
+```
+
+### 更新
+```go
+   rpc UpdateRechargeAmount(Bytes) returns (Bytes) {
+        option (args) = "amount int";
+        option (sql) = "update balance_recharge set amount = ?";
+    }
+```
+
+### 事务
+```go
+    rpc DoRechargeIncrAmount(Bytes) returns (Recharge) {
+        option (args) = "rechargeId string, amount int";
+    }
+```
+
+---
+## 代码生成
+
+```go
+    // save
+    recharge := dal.NewRecharge(ctx)
+    recharge.Save() // insert into
+
+    // update
+    // update set ... where id = ?
+    recharge.Update()
+    // update set updated = now(), amount = ? where id = ?
+    recharge.Update(dal.RechargeCol.Amount)
+
+    // incr
+    // update amount = amount + ?
+    recharge.Incr(&db.ColValue{dal.RechargeCol.Amount, 10})
+
+    // delete
+    recharge.Delete()	// delete from where id =
+
+    // query
+    // select from where acct_id = ?
+    recharge := dal.FindRechargeByAcctId(ctx, acctId)
+    if recharge == nil {
+        log.Println("find")
+    }
+```
+---
+## 生成事务方法
+
+直接使用 tx := db.Begin() 可能存在的问题是：
+
+- tx 会贯穿所有的调用，很难传递到方法里，导致不可复用
+
+- 异常导致 db.Begin() 开始，而 Commit() 或 Rollback() 没有调用，连接丢失
+
+使用代码生成：
+
+```go
+
+// transaction
+func DoRechargeIncrAmount(ctx context.Context, rechargeId string, amount int) *Recharge {
+	daler := db.Open(ctx, "balance.recharge")
+	ctxTx, err := daler.Begin(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			logError(fmt.Sprintf("db.SetTxUnexpectedError due to: %v", r))
+			db.SetTxUnexpectedError(ctxTx)
+		}
+		daler.End(ctxTx)
+	}()
+	return doRechargeIncrAmount(ctxTx, rechargeId, amount)
+}
+```
+---
+## 动态字段查询
+
+对于最常用的查询，我希望通过约定方法的方式，一直进行复用
+
+如果确实有动态参数查询：
+
+比如通过 web 传递参数，如果有的话就作为查询项，组合很多情况
+
+解决方法：设计 query 对象，用于动态的 where aa = bb 查询 // gorm 
+
+```go
+// select * from recharge where app_id = ? and acct_id = ? order by created asc;
+	query := dal.NewRechargeQuery(ctx)
+	recharges := query.AppId("=", appId)
+				.AcctId("=", acctId)
+				.Orderby(dal.RechargeCol.Created, db.Order.Asc)
+				.List()
+```
+---
+## 批量的操作
+
+1 实现了 Doer 接口 // 使用 PreparedStatement 来代替迭代
+
+```go
+type Refundeds []*Refunded
+
+func (r *Refundeds) Save()
+func (r *Refundeds) Update()
+...
+```
+
+2 java8 streams 实现 
+
+foreach, filter, map, reduce, sort, avg/mid/sum/min/max
+
+遍历 refunded 列表，每个 amount 都乘以 2， 如果 amount 大于 1000，求总和
+```go
+amount = refundeds.Foreach(func(r *Refunded) {
+			r.Amount = r.Amount * 2
+		}).Filter(func(r *Refunded) *Refunded {
+			if r.Amount > 1000 {
+				return r
+			}
+			return nil
+		})).Sum(func(r *Refunded) int {
+			return r.Amount
+		})
+	)
+```
+
+---
+### API
+
+- http vs rpc
+
+- 定义 input 和 output
+
+- 实现接口等同于实现方法
+
+- Binding 和 Validate 
+
+- DSL 描述生成 Client 代码和文档 // swagger，postman，restlet，markdown
+
+---
+### Protocol Buffer 定义请求，响应，和方法
+
+```go
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+
+```
+---
+### http 和 rpc 的统一
+
+以下定义满足 http 规范，也符合 grpc 要求：
+
+```go
+message TransactionReq {
+    dal.Transaction Transaction = 1;
+    Metadata        Metadata = 2;
+}
+
+message TransactionResp {
+    dal.Transaction Transaction = 1;
+    Error           Error = 2;
+}
+
+service TransactionAPI {
+
+    rpc Get(TransactionReq) returns (TransactionResp) {
+        option (http) = {
+            get: "/v1/apps/{app_id}/balance_transactions/{transaction_id}"
+        };
+    }
+
+    rpc Post(TransactionReq) returns (TransactionResp) {
+        option (http) = {
+            post: "/v1/apps/{app_id}/balance_transactions"
+        };
+    }
+
+    rpc Put(TransactionReq) returns (TransactionResp) {
+        option (http) = {
+            put: "/v1/apps/{app_id}/balance_transactions/{transaction_id}"
+        };
+    }
+
+    rpc Delete(TransactionReq) returns (TransactionResp) {
+        option (http) = {
+            delete: "/v1/apps/{app_id}/balance_transactions/{transaction_id}"
+        };
+    }
+}
+```
+---
+### http 简化
+
+- Cookie / Header / Url / Query Parameter 封装成 Metadata，就是 map[string]string
+
+- Body 映射为请求结构体，映射到定义的 message
+
+- Response 错误的处理
+
+- get / post / put / delete 映射到不同的方法
+
+```bash
+curl -XPUT -H "Content-Type: application/json" \
+/v1/apps/app_id/balance_transactions/transaction_id?aaa=bbb \
+-d '{"transaction": {"available_balance": 1}}'
+```
+
+对应于
+```go
+&TransactionReq {
+	dal.Transaction {AvailableBalance: 1}
+	Metadata map[string]string{":app_id": "app_id", ":transaction_id": "transaction_id", "?aaa": "bbb"}
+}
+```
+---
+### 开发者只需要实现对应的方法
+
+```go
+func get(ctx context.Context, input *TransactionReq) (*TransactionResp, error) {
+	tran := dal.FindTransactionByTxnId(ctx, input.Metadata[":transaction_id"])
+	return &TransactionResp{Transaction: tran, Error: nil}, nil
+}
+
+func post(ctx context.Context, input *TransactionReq) (*TransactionResp, error) {
+	tran := input.Transaction
+	err := tran.Save()
+	if err != nil {
+		return nil, err
+	}
+	return &TransactionResp{Transaction: tran, Error: nil}, nil
+}
+
+func put(ctx context.Context, input *TransactionReq) (*TransactionResp, error) {
+	tran := input.Transaction
+	tran.AvailableBalance = tran.AvailableBalance + 1
+	tran.TransactionType = dal.TransactionEnum.TransactionType.Recharge
+	tran.Update(dal.TransactionCol.AvailableBalance, dal.TransactionCol.TransactionType)
+	log.Println(input.Transaction)
+	return &TransactionResp{Transaction: tran, Error: nil}, nil
+}
+
+func _delete(ctx context.Context, input *TransactionReq) (*TransactionResp, error) {
+	input.Transaction.Delete()
+	return input.Transaction, nil
+}
+```
+---
+### 自动生成的 echo 代码
+```go
+	e.GET("/v1/apps/:app_id/balance_transactions/:transaction_id", func(c echo.Context) error {
+		log.Println("Get")
+		input := &TransactionReq{}
+		err := c.Bind(input)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		ctx := c.Get("ctx").(context.Context)
+		output, err := Get(ctx, input)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		err = c.JSON(200, output)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		return nil
+	})
+```
+在 context 上面传递 requestId, logger, tracer
+---
+## 代码生成带来的好处：
+
+- 绝大部分都不需要和 sql 打交道，需要定义的是方法
+
+- 提供动态查询的接口
+
+- AOP，因为方法是我们生成的，logging，tracing 可以注入每个方法
+
+- 遵循 context.Context 模型
+
+- 做到同步渲染 client，docs，不需要额外的工作
+
+- sql 语句的审核，自检
+
+- golang 范型，interface{}
+
+- 减少心智，上下文，减少重复的事务，代码本身只需要关注业务
+
+---
+### 实践
+
+以上提到的代码：
+
+#### protoc-gen-pingxx-dal
+
+https://git.pingxx.com/API/pingpp-incubator/tree/master/protoc-gen-pingxx-dal
+
+#### protoc-gen-pingxx-api
+
+https://git.pingxx.com/API/pingpp-incubator/tree/master/protoc-gen-pingxx-api
+
+#### example
+
+https://git.pingxx.com/API/pingpp-incubator/tree/master/example
+
+---
+## 总结
+
+当我们讨论一个统一的框架的时候，需要明确几点：
+
+- 80% / 20% 原则，为的是解决 80% 的问题
+
+- 没有银弹，每个设计都有针对的场景，这就是目前约束在内部服务的一个原因，因为协议、规范是我们可以约定的
+
+- 大量的生成代码，并不优雅
+
+- 失去很多编码的自由
+
+终究到底，我们是希望，使用代码来代替人的机械行为，因为稳健性高于优雅。
+
+---
+    </textarea>
+    <script src="https://iot.espressif.cn/static/js/remark-latest.min.js"></script>
+    <script>
+      var hljs = remark.highlighter.engine;
+    </script>
+    <script src="https://iot.espressif.cn/static/js/remark.language.js"></script>
+    <script>
+      var slideshow = remark.create({
+          highlightStyle: 'monokai',
+          highlightLanguage: 'remark',
+          highlightLines: true
+        }) ;
+    </script>
+  </body>
+</html>

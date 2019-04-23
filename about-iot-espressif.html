@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="iot espressif" />
+    <meta name="description" content="iot cloud at espressif" />
+    <link rel="icon" href="https://espressif.com/sites/all/themes/espressif/favicon.ico" type="image/x-icon">
+    <title>IoT · Espressif</title>
+    <style>
+//      @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+//      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+//      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p { line-height: 1.25em; }
+      .small {font-size: 0.5em;}
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .img-30 img {
+        width: 30%;
+        height: 30%;
+        margin-right: 10px;
+      }
+      .img-80 img {
+        width: 80%;
+        height: 80%;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# IoT · Espressif
+[乐鑫 IoT 云服务]
+---
+layout: false
+## 市场上的 IoT 云服务
+
+海外：
+
+- [Xively](https://xively.com) is in business to help you connect and launch your product securely and at scale
+
+- [Thingspeak](https://thingspeak.com) The open data platform for the Internet of Things
+
+国内生态：
+
+- [Aliyun IoT](https://www.aliyun.com/solution/iot/) 阿里云 物联网解决方案
+
+- [微信硬件平台](http://iot.weixin.qq.com/) 连接物与人，物与物的 IOT 解决方案
+
+初创企业：
+
+- [机智云](http://www.gizwits.com/) IoT 物联网云服务平台及智能硬件自助开发平台
+
+- [氦氪云](http://www.hekr.me/) 深度，智能，开放的智能硬件云平台
+
+---
+## 大部分 IoT 云服务都提供：
+
+1. 数据推送
+
+2. 反向控制
+
+3. Protocol （Http / Json / Websocket / Mqtt / Mesh）
+
+4. 权限控制（用户 / 分享 / 授权）
+
+5. 出厂和激活
+
+6. Timer
+
+7. Trigger
+
+8. Queue / Event
+
+9. OTA
+
+10. Pushing / Notify
+
+11. Thirdparty（Wechat / QQ）
+
+12. Big Data
+---
+## 1. 数据推送
+
+提供命名空间的读写 (Datastream / Datapoint)
+
+```bash
+curl -X POST -d '{"datapoint": {"x": 26.0, "y": 80}'
+https://iot.espressif.cn/v1/datastreams/tem-hum/datapoint
+``` 
+![](http://iot.espressif.cn/slide/datapoint.png)
+
+---
+## 2. 反向控制
+
+1 (Device) 长连接在线，身份认证
+```bash
+> telnet iot.espressif.cn 8000
+{
+  "path": "/v1/device/identify/",
+  "method": "POST",
+  "meta": {
+    "Authorization": "token 5d9eaf365c4fb8786ac5aad54434bea834e45ec0"
+  }
+}
+``` 
+
+2 (App)
+```bash
+curl -H 'Authorization: token 26f1bc7f2944271bfde7222a3a83124f04fbf4a7'
+-d '{"datapoint": {"x": 1}'
+https://iot.espressif.cn/v1/datastreams/status/datapoint/?deliver_to_device=true
+``` 
+---
+## 2. 反向控制
+
+3 (Device) 监听消息，协议约定
+```bash
+{
+  "path": "/v1/datastreams/status/datapoint/",
+  "method": "POST",
+  "meta": {
+    "Authorization": "token 26f1bc7f2944271bfde7222a3a83124f04fbf4a7",
+    "Time-Zone": "Asia/Kashgar"
+  },
+  "body": {
+    "datapoint": {
+      "x": 1
+    }
+  },
+  "nonce": 338033194,
+  "deliver_to_device": true
+}
+```
+---
+## 2. 反向控制
+
+4 (Device) 执行操作及反馈
+
+Turn On The Light And Response:
+
+```bash
+{"status": 200, "nonce": 338033194, "deliver_to_device": true}
+```
+
+5 (App) Http Return
+
+```bash
+{"status": 200, "nonce": 338033194, "deliver_to_device": true, "datapoint": {...}}
+```
+
+Or (if light is offline)
+
+```bash
+{"status": 404, "nonce": 80959298, "message": "remote device is disconnect"}
+```
+
+![](http://iot.espressif.cn/slide/app-cloud-device.png)
+
+---
+## 3. Protocol （Http / Json / Websocket / Mqtt / Mesh）
+
+- Http .small[App / Thirdparty]
+
+> Hypertext Transfer Protocol. IoT · Espressif API Design [see](http://iot.espressif.cn/#/api-zh-cn/).
+
+
+- Json .small[Device / App / ...]
+
+> is a .red[**lightweight**] data-interchange format.
+
+> It is easy for humans to read and write.
+
+- Websocket .small[Explorer]
+
+> is a protocol providing .red[**full-duplex**] communication channels over a single TCP connection
+
+- Mqtt .small[Device, message queue mode]
+
+> A lightweight .red[**messaging protocol**] for small sensors and mobile devices, optimized for high-latency or unreliable networks
+
+- Mesh .small[Multiple Device]
+
+> Esp-Mesh Private Protocol
+
+---
+## 3. Protocol
+
+<div class="center middle">
+    <h1>Binary Vs Text ?</h1>
+    <h1> ... </h1>
+</div>
+
+- 为什么推荐 Plain Text 的协议？
+
+- 噢，我们是 Device !
+
+---
+## 4. 权限控制（用户 / 分享 / 授权）
+
+- Key 是权限的核心
+
+  Authorization: token .red[26f1bc7f2944271bfde7222a3a83124f04fbf4a7]
+
+- 身份标识（出厂烧录）
+
+- Key 衍生新的 Key -> Master / Owner / Other 
+
+- Permission: access_methods / source_ip / expired_at
+
+### Share
+```bash
+curl -X POST -H "Authorization: token Master-Key"
+-d '{"access_methods":"*", "source_ip":"*", "expired_at": "2017-05-05 17:31:23"}'
+https://iot.espressif.cn/v1/key/share/
+```
+
+### Authorize
+```bash
+curl -X POST -H "Authorization: token USER-KEY" -d '{"token": "token"}'
+https://iot.espressif.cn/v1/key/authorize/
+```
+
+---
+## 5. 出厂和激活
+
+- 批量产生 / 导出
+
+- Bin 烧录
+
+- 近距离联网 Airkiss / Esp-Touch
+
+```bash
+> telnet iot.espressif.cn 8000
+{
+  "path": "/v1/device/activate/",
+  "method": "POST",
+  "meta": {
+    "Authorization": "token MASTER-KEY"
+  },
+  "body": {
+    "encrypt_method": "PLAIN",
+    "bssid": ":bssid",
+    "token": ":token"
+  }
+}
+```
+
+---
+## 6. Timer
+
+#### 场景
+
+- Call Me At 8:00pm
+
+- Loop Every 1 Minute
+
+- At Thursday, Sunday ...
+
+#### 需要解决几个问题：
+
+- 谁来定时调用？服务端还是客户端
+
+- 设备的限制（缺少时间和日期计算）
+
+---
+## 7. Trigger
+
+#### 场景
+
+- Notify Me If Temperature > 80ºC
+
+- Make A URL Request If .red[Avg](Temperature) .red[>] .red[50ºC] In .red[10] Minutes
+
+- Function: Avg / Sum / Max / Min
+
+- Compare: < / > / <= / >= / !=
+
+#### 需要解决几个问题：
+
+- 扩展第三方支持
+
+- IFTTT If-This-Then-That
+
+---
+## 8. Queue / Event
+
+- Message Queue
+
+- Subscribe / Unsubscribe / Publish (Action)
+
+- Broadcast / Multicast (Namespace)
+
+```bash
+> Publish '{"light": "on"}' /lights
+```
+
+```bash
+> Publish '{"light": "off"}' /lights/floor/3
+```
+
+对于每一个灯，只需要订阅对应的消息
+```bash
+> Subscribe /lights /lights/floor/3
+```
+----
+
+目前使用了 Mbox 来作为消息模型，可以使用 Mqtt 协议。
+
+---
+## 9. OTA
+
+- Rpc Send OTA Request
+
+- HTTP Download Processing
+
+- Restart
+
+Rpc:
+```bash
+curl '/v1/device/rpc/?deliver_to_device=true&action=sys_upgrade&version=v0.42'
+```
+
+Http Download BIN:
+```bash
+curl '/v1/device/rom/?action=download_rom&version=v0.42&filename=user2.bin'
+```
+
+----
+
+问题：
+
+- 安全（SSL，CRC校验）
+
+- 可回退（进入新版本失败）
+
+---
+## 10. Pushing / Notify
+
+- Apns / Gcm / Mpns
+
+- Phone / Mail / Url
+
+- 自定义规则推送
+
+- IFTTT
+
+----
+
+.img-80[.center[
+### 以 Apple Push Notification Service 为例子
+![](http://iot.espressif.cn/slide/apns_remote_notif_simple.png)
+]]
+
+---
+## 11. Thirdparty（Aliyun / Wechat / QQ / JD / Xiaomi）
+
+- Wechat 生态圈 （公众号，硬件平台）
+
+- JD Html5 APP 嵌入
+
+- ...
+
+.img-30[![](http://iot.espressif.cn/slide/1392658683.jpg)] 
+.img-30[![](http://iot.espressif.cn/slide/828133974.jpg)] 
+.img-30[![](http://iot.espressif.cn/slide/1251989148.jpg)] 
+
+---
+## 12. Big Data
+
+- 大量的 Datapoints 汇聚成 Data
+
+<div class="center middle">
+    <h1 style="margin-top: 0px; font-size: 300px">略</h1>
+</div>
+---
+template: inverse
+# IoT · Demo
+[基于 iot.espressif.cn 开发]
+
+---
+## Temperature 推送和事件监听（多协议支持）
+
+### 1 Open [http://iot.espressif.cn/temperature-via-websocket.html](http://iot.espressif.cn/temperature-via-websocket.html)
+.center[
+#39ºC
+]
+
+### 2 Run Script
+```Bash
+for x in 1 2 3 4 5 6 7 8 9 10
+do
+  let x=`date +"%s"`*13%100
+  curl -X POST -d "{\"datapoint\": {\"x\": $x}}" \
+  -H 'Authorization: token 44590e7ccb254203073aeb61777a4c425b20a018' \
+  https://iot.espressif.cn/v1/datastreams/tem_hum/datapoint
+  sleep 1
+done
+```
+
+---
+## 基于微信 H5 开发 App 控制 Mesh Lights
+### 1 Open [http://iot.espressif.cn/app/](http://iot.espressif.cn/app/)
+
+### 2 Device / Mesh Controll
+
+.img-30[![](http://iot.espressif.cn/slide/558413883.jpg)] 
+.img-30[![](http://iot.espressif.cn/slide/1977145315.jpg)] 
+.img-30[![](http://iot.espressif.cn/slide/242746709.jpg)] 
+
+---
+template: inverse
+# Architecture
+[架构，技术细节，实现]
+---
+## 架构
+![](http://iot.espressif.cn/slide/Architecture3.png)
+---
+## 技术细节
+
+### 1 长连接的可用性，Golang 实现 Middle Tier
+
+### 2 服务发现和可用性检测
+
+### 3 ORM 代码的 Generator
+
+### 4 消息流
+
+---
+template: inverse
+# Others
+---
+## 不足（挖下的坑）
+
+### 1 协议的选择
+
+### 2 API 过于繁琐
+
+### 3 缺乏专业前端和设计
+
+---
+## 未来
+
+### 1 开源？
+
+### 2 共有云？
+
+### 3 解决方案？
+
+---
+template: inverse
+# Questions ?
+
+    </textarea>
+    <script src="https://iot.espressif.cn/static/js/remark-latest.min.js"></script>
+    <script>
+      var hljs = remark.highlighter.engine;
+    </script>
+    <script src="https://iot.espressif.cn/static/js/remark.language.js"></script>
+    <script>
+      var slideshow = remark.create({
+          highlightStyle: 'monokai',
+          highlightLanguage: 'remark',
+          highlightLines: true
+        }) ;
+    </script>
+  </body>
+</html>
