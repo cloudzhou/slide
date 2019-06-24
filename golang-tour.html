@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="Golang 入门" />
+    <meta name="description" content="" />
+    <link rel="icon" href="https://www.pingxx.com/assets/img/touch_icon.png" type="image/png">
+    <title>Golang 入门</title>
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 4em;
+	right: 5em;
+      }
+      li p { line-height: 1.25em; }
+      .small {font-size: 0.5em;}
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .img-30 img {
+        width: 30%;
+        height: 30%;
+        margin-right: 10px;
+      }
+      .img-80 img {
+        width: 80%;
+        height: 80%;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# Golang 入门
+
+.footnote[yunzhou.wu@pingxx.com]
+---
+layout: false
+### Hello world.go
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("hello world")
+}
+```
+
+保存成为文件 helloworld.go，运行
+```bash
+> go run helloworld.go
+hello world
+> go build -o helloworld helloworld.go
+> ./helloworld
+hello world
+```
+
+Golang 的一些特点：
+
+- 无参数传入（使用 os 模块）
+- 无返回 Code
+- 库作为基本的引用单元
+- 静态编译 // du -sh helloworld
+- 跨平台编译，可以理解为源代码级别的平台无关
+---
+### Hello world.go (HTTP)
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, you've requested: %s\n", r.URL.Path)
+	})
+
+	http.ListenAndServe(":80", nil)
+}
+```
+
+Go 的哲学：
+
+1. 官方库只关注必要的功能，扩展由外部实现，保持简洁
+
+2. 基本的数据结构，int / uint / string / bool / map / slice
+
+3. 工程性语言，以解决问题，保持维护性为主导的语言
+
+4. 克制与独裁：错误处理（error vs exception） / 范型 / 包管理（依赖）
+
+  （Go 是不是 Google 的一门语言？）
+---
+## 工具化
+```bash
+> go
+	build       compile packages and dependencies
+	clean       remove object files
+	doc         show documentation for package or symbol
+	env         print Go environment information
+	bug         start a bug report
+	fix         run go tool fix on packages
+	fmt         run gofmt on package sources
+	generate    generate Go files by processing source
+	get         download and install packages and dependencies
+	install     compile and install packages and dependencies
+	list        list packages
+	run         compile and run Go program
+	test        test packages
+	tool        run specified go tool
+	version     print Go version
+	vet         run go tool vet on packages
+```
+
+Go 设计
+- 约定大于配置 // gofmt 是一个例子
+- 一个工具解决一个问题
+- 不是严格的 OOP，过程语言同时带有函数化编程 // better C
+- while; do while; -> for
+- a++; ++a; a = ++b; a = b++
+---
+## 基本的数据结构
+
+- bool
+- string
+- int  int8  int16  int32  int64
+- uint uint8 uint16 uint32 uint64 uintptr
+- byte // alias for uint8
+- rune // alias for int32
+- float32 float64
+- complex64 complex128
+
+以及复杂结构
+
+- slice 
+- map
+
+```go
+var i int8
+var j int16
+
+i = j // ???
+j = i // ???
+k := i + j // ???
+```
+
+值传递和指针
+
+---
+## Go test
+add_test.go
+```go
+
+import "testing"
+
+func add(x, y int) int {
+	return x + y
+}
+
+func TestAdd(t *testing.T) {
+	for _, cond := range []struct {
+		x      int
+		y      int
+		expect int
+	}{
+		{1, 1, 2},
+	} {
+		if add(cond.x, cond.y) != cond.expect {
+			t.Fatalf("%d + %d != %d", cond.x, cond.y, cond.expect)
+		}
+	}
+}
+```
+
+Table Driven Tests
+---
+## 覆盖率和性能测试
+
+```go
+> go test -test.coverprofile coverage.cov
+> go tool cover -html=coverage.cov -o coverage.html
+> open coverage.html
+```
+
+- 保持一定覆盖率要求，是代码质量的基本保证
+
+- 问题：
+	- 代码里存在了太多运行不起来的测试用例
+	- 最大的问题，还在于维护一套可用测试集合的成本
+	- 资源即服务 // 需要一个 mysql / redis / nsq ...
+	- http://docs.system.pingxx.com/pages/viewpage.action?pageId=75202573 （程序员自测实践）
+
+- 意识到测试是开发的一环
+
+- 什么时候写测试代码？TDD？
+
+- 开发代码/测试代码的比重
+
+---
+## 并发
+
+- 本质：
+
+	- CSP 模型
+
+	- 内存模型
+		- Java Memory Model
+		  https://en.wikipedia.org/wiki/Java_memory_model
+
+		- The Go Memory Mod
+		  https://golang.org/ref/mem
+
+	- happens-before
+
+	- 顺序和可见效
+
+	- 以同步的方式来写异步代码，io 事件 // 回调不是一个好的模型
+---
+## Goroutine 计算 1亿 个随机数字累积和
+
+```go
+func TestAdd(t *testing.T) {
+	var rint32s [100000000]int32
+	for i := range rint32s {
+		rint32s[i] = rand.Int31()
+	}
+	start := time.Now()
+	var total int64
+	for _, v := range rint32s {
+		total = total + int64(v)
+	}
+	t.Log("consuming time:", time.Since(start))
+}
+```
+
+三个版本：
+
+- 无并发，累加和
+
+- 使用 chan int64 分段累加，最后合并
+
+- 使用 atomic 模块来累加和，WaitGroup 等待完成
+
+- 加个函数试试 math.Sqrt vs math.Tan
+---
+## Goroutine 计算 1亿 个随机数字累积和（并发版本）
+---
+## 并发的陷阱
+
+- 
+---
+## Ping++ 目前的 Go 应用
+
+- 刚开始接触一门新的语言，不要带入之前语言的习惯
+
+- 从源代码入手 // read the f*k code
+
+- 从 http handler 入手，一直到底下的实现
+
+- 从 issue 开始，尤其是小的 issue
+
+- 记录逻辑的流程，数据的转化
+
+---
+## 工具和链接
+
+- https://golang.org/doc/
+
+- https://go-zh.org/doc/
+
+- https://tour.go-zh.org/ (Go 指南)
+
+- https://github.com/bingohuang/effective-go-zh-en
+
+- https://github.com/golang/go/wiki
+
+    </textarea>
+    <script src="https://iot.espressif.cn/static/js/remark-latest.min.js"></script>
+    <script>
+      var hljs = remark.highlighter.engine;
+    </script>
+    <script src="https://iot.espressif.cn/static/js/remark.language.js"></script>
+    <script>
+      var slideshow = remark.create({
+          highlightStyle: 'monokai',
+          highlightLanguage: 'remark',
+          highlightLines: true
+        }) ;
+    </script>
+  </body>
+</html>
+
